@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizing {{ algorithm }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <script>
+        let steps = [];
+        let currentStep = 0;
+
+        function processData() {
+            let values = document.getElementById("inputValues").value;
+            fetch("/sort", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ algorithm: "{{ algorithm }}", values: values })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("display").innerHTML = data.error;
+                } else {
+                    document.getElementById("original").innerText = "Первоначальный массив: " + data.original;
+                    document.getElementById("sorted").innerText = "Отсортированный массив: " + data.sorted;
+                    steps = data.steps;
+                    currentStep = 0;
+                    updateStepDisplay();
+                }
+            });
+        }
+
+        function generateRandomArray() {
+            let arr = Array.from({length: 10}, () => Math.floor(Math.random() * 100));
+            document.getElementById("inputValues").value = arr.join(" ");
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateStepDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        }
+
+        function updateStepDisplay() {
+            document.getElementById("stepDisplay").innerText = "Шаг " + (currentStep + 1) + ": " + steps[currentStep];
+        }
+
+        function stackOperation(operation) {
+            let value = document.getElementById("stackValue").value;
+            fetch("/stack", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ operation: operation, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("stackDisplay").innerText = "Стек: " + JSON.stringify(data.stack);
+                document.getElementById("stackValue").value = ''; 
+            });
+        }
+
+        function queueOperation(operation) {
+            let value = document.getElementById("queueValue").value;
+            fetch("/queue", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ operation: operation, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("queueDisplay").innerText = "Очередь: " + JSON.stringify(data.queue);
+                document.getElementById("queueValue").value = ''; 
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Визуализация алгоритма: {{ algorithm | replace("_", " ") | title }}</h1>
+
+        {% if algorithm in ["bubble_sort", "insertion_sort", "merge_sort", "quick_sort"] %}
+            <div class="algorithm-description">
+                <h3>{{ algorithm | replace("_", " ") | title }} Алгоритм</h3>
+                <p>
+                    {% if algorithm == "bubble_sort" %}
+                        Сортировка пузырьком — это простой алгоритм сортировки, который многократно проходит по списку, сравнивает соседние элементы и меняет их местами, если они идут в неправильном порядке. Процесс повторяется, пока весь список не будет отсортирован.
+                    {% elif algorithm == "insertion_sort" %}
+                        Сортировка вставками строит отсортированный массив по одному элементу за раз. Алгоритм берет следующий элемент из неотсортированной части массива и вставляет его в нужную позицию в отсортированной части.
+                    {% elif algorithm == "merge_sort" %}
+                        Сортировка слиянием — это алгоритм "разделяй и властвуй". Массив делится на две части, каждая из которых сортируется рекурсивно, а затем части сливаются обратно в отсортированный массив.
+                    {% elif algorithm == "quick_sort" %}
+                        Быстрая сортировка — это эффективный алгоритм, который выбирает опорный элемент (пивот) и разделяет массив на две части: одну с элементами меньше опорного, а другую с большими. Затем каждая часть сортируется отдельно.
+                    {% endif %}
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    {% if algorithm == "bubble_sort" %}
+                        def bubble_sort(arr):
+                            for i in range(len(arr)):
+                                for j in range(0, len(arr)-i-1):
+                                    if arr[j] > arr[j+1]:
+                                        arr[j], arr[j+1] = arr[j+1], arr[j]
+                    {% elif algorithm == "insertion_sort" %}
+                        def insertion_sort(arr):
+                            for i in range(1, len(arr)):
+                                key = arr[i]
+                                j = i - 1
+                                while j >= 0 and key < arr[j]:
+                                    arr[j + 1] = arr[j]
+                                    j -= 1
+                                arr[j + 1] = key
+                    {% elif algorithm == "merge_sort" %}
+                        def merge_sort(arr):
+                            if len(arr) > 1:
+                                mid = len(arr) // 2
+                                left = arr[:mid]
+                                right = arr[mid:]
+                                merge_sort(left)
+                                merge_sort(right)
+                                i = j = k = 0
+                                while i < len(left) and j < len(right):
+                                    if left[i] < right[j]:
+                                        arr[k] = left[i]
+                                        i += 1
+                                    else:
+                                        arr[k] = right[j]
+                                        j += 1
+                                    k += 1
+                                while i < len(left):
+                                    arr[k] = left[i]
+                                    i += 1
+                                    k += 1
+                                while j < len(right):
+                                    arr[k] = right[j]
+                                    j += 1
+                                    k += 1
+                    {% elif algorithm == "quick_sort" %}
+                        def quick_sort(arr):
+                            if len(arr) <= 1:
+                                return arr
+                            pivot = arr[len(arr) // 2]
+                            left = [x for x in arr if x < pivot]
+                            middle = [x for x in arr if x == pivot]
+                            right = [x for x in arr if x > pivot]
+                            return quick_sort(left) + middle + quick_sort(right)
+                    {% endif %}
+                </code></pre>
+            </div>
+
+            <div class="input-section">
+                <input type="text" id="inputValues" placeholder="Введите значения (через пробел)">
+                <button onclick="processData()" class="btn">Сортировать</button>
+                <button onclick="generateRandomArray()" class="btn">Случайный массив</button>
+            </div>
+            <p id="original"></p>
+            <p id="stepDisplay">Шаг: </p>
+            <div class="navigation">
+                <button onclick="prevStep()" class="btn">Предыдущий шаг</button>
+                <button onclick="nextStep()" class="btn">Следующий шаг</button>
+            </div>
+            <p id="sorted"></p>
+
+        {% elif algorithm == "stack" %}
+            <div class="algorithm-description">
+                <h3>Алгоритм Стек</h3>
+                <p>
+                    Стек — это структура данных, которая работает по принципу "Последним пришел — первым ушел" (LIFO). Это означает, что последний добавленный элемент будет первым, который мы уберем. Стек поддерживает операции добавления элемента (push) и удаления элемента (pop).
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    stack = []
+                    def push(value):
+                        stack.append(value)
+
+                    def pop():
+                        if stack:
+                            return stack.pop()
+                        return None
+                </code></pre>
+            </div>
+            <div class="input-section">
+                <input type="text" id="stackValue" placeholder="Введите значение">
+                <button onclick="stackOperation('push')" class="btn">Добавить</button>
+                <button onclick="stackOperation('pop')" class="btn">Убрать</button>
+            </div>
+            <div id="stackDisplay"></div>
+
+        {% elif algorithm == "queue" %}
+            <div class="algorithm-description">
+                <h3>Алгоритм Очередь</h3>
+                <p>
+                    Очередь — это структура данных, работающая по принципу "Первым пришел — первым ушел" (FIFO). Это означает, что первый добавленный элемент будет первым удален. Очередь поддерживает операции добавления элемента (enqueue) и удаления элемента (dequeue).
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    queue = []
+                    def enqueue(value):
+                        queue.append(value)
+
+                    def dequeue():
+                        if queue:
+                            return queue.pop(0)
+                        return None
+                </code></pre>
+            </div>
+            <div class="input-section">
+                <input type="text" id="queueValue" placeholder="Введите значение">
+                <button onclick="queueOperation('enqueue')" class="btn">Добавить</button>
+                <button onclick="queueOperation('dequeue')" class="btn">Убрать</button>
+            </div>
+            <div id="queueDisplay"></div>
+        {% endif %}
+    </div>
+</body>
+</html>
