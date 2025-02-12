@@ -6,6 +6,38 @@
     <title>Visualizing {{ algorithm }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
+    <style>
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+
     <script>
         let steps = [];
         let currentStep = 0;
@@ -80,6 +112,102 @@
                 document.getElementById("queueDisplay").innerText = "Очередь: " + JSON.stringify(data.queue);
                 document.getElementById("queueValue").value = ''; 
             });
+        }
+
+        function linearTableOperation(operation) {
+            let value = document.getElementById("linearTableValue").value;
+            fetch("/linear_table", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ operation: operation, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderLinearTable(data.linear_table);
+                document.getElementById("linearTableValue").value = '';
+            });
+        }
+
+        function renderLinearTable(data) {
+            let tableHtml = '<table><tr><th>Индекс</th><th>Значение</th></tr>';
+            data.forEach((value, index) => {
+                tableHtml += `<tr><td>${index}</td><td>${value}</td></tr>`;
+            });
+            tableHtml += '</table>';
+            document.getElementById("linearTableDisplay").innerHTML = tableHtml;
+        }
+
+        function treeTableOperation(operation) {
+            let key = document.getElementById("treeTableKey").value;
+            let value = document.getElementById("treeTableValue").value;
+            fetch("/tree_table", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ operation: operation, key: key, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderTreeTable(data.tree_table);
+                document.getElementById("treeTableKey").value = '';
+                document.getElementById("treeTableValue").value = '';
+            });
+        }
+
+        function renderTreeTable(data) {
+            let tableHtml = '<table><tr><th>Ключ</th><th>Значение</th></tr>';
+            for (let key in data) {
+                tableHtml += `<tr><td>${key}</td><td>${data[key]}</td></tr>`;
+            }
+            tableHtml += '</table>';
+            document.getElementById("treeTableDisplay").innerHTML = tableHtml;
+        }
+
+        function hashTableOperation(operation) {
+            let key = document.getElementById("hashTableKey").value;
+            let value = document.getElementById("hashTableValue").value;
+            fetch("/hash_table", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ operation: operation, key: key, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderHashTable(data.hash_table);
+                document.getElementById("hashTableKey").value = '';
+                document.getElementById("hashTableValue").value = '';
+            });
+        }
+
+        function renderHashTable(data) {
+            let tableHtml = '<table><tr><th>Ключ</th><th>Значение</th></tr>';
+            for (let key in data) {
+                tableHtml += `<tr><td>${key}</td><td>${data[key]}</td></tr>`;
+            }
+            tableHtml += '</table>';
+            document.getElementById("hashTableDisplay").innerHTML = tableHtml;
+        }
+
+        function sortedTableOperation(operation) {
+            let value = document.getElementById("sortedTableValue").value;
+            fetch("/sorted_table", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ operation: operation, value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderSortedTable(data.sorted_table);
+                document.getElementById("sortedTableValue").value = '';
+            });
+        }
+
+        function renderSortedTable(data) {
+            let tableHtml = '<table><tr><th>Индекс</th><th>Значение</th></tr>';
+            data.forEach((value, index) => {
+                tableHtml += `<tr><td>${index}</td><td>${value}</td></tr>`;
+            });
+            tableHtml += '</table>';
+            document.getElementById("sortedTableDisplay").innerHTML = tableHtml;
         }
     </script>
 </head>
@@ -218,6 +346,105 @@
                 <button onclick="queueOperation('dequeue')" class="btn">Убрать</button>
             </div>
             <div id="queueDisplay"></div>
+
+            {% elif algorithm == "linear_table" %}
+            <div class="algorithm-description">
+                <h3>Линейная таблица на основе массива</h3>
+                <p>
+                    Линейная таблица — это структура данных, которая хранит элементы в виде массива. Элементы добавляются и удаляются последовательно.
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    linear_table = []
+                    def insert(value):
+                        linear_table.append(value)
+
+                    def delete(value):
+                        if value in linear_table:
+                            linear_table.remove(value)
+                </code></pre>
+            </div>
+            <div class="input-section">
+                <input type="text" id="linearTableValue" placeholder="Введите значение">
+                <button onclick="linearTableOperation('insert')" class="btn">Добавить</button>
+                <button onclick="linearTableOperation('delete')" class="btn">Удалить</button>
+            </div>
+            <div class="table-container" id="linearTableDisplay"></div>
+
+        {% elif algorithm == "tree_table" %}
+            <div class="algorithm-description">
+                <h3>Таблица на основе дерева</h3>
+                <p>
+                    Таблица на основе дерева использует структуру данных "дерево" для хранения элементов. Каждый элемент имеет ключ и значение, и элементы упорядочены по ключу.
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    tree_table = {}
+                    def insert(key, value):
+                        tree_table[key] = value
+
+                    def delete(key):
+                        if key in tree_table:
+                            del tree_table[key]
+                </code></pre>
+            </div>
+            <div class="input-section">
+                <input type="text" id="treeTableKey" placeholder="Введите ключ">
+                <input type="text" id="treeTableValue" placeholder="Введите значение">
+                <button onclick="treeTableOperation('insert')" class="btn">Добавить</button>
+                <button onclick="treeTableOperation('delete')" class="btn">Удалить</button>
+            </div>
+            <div class="table-container" id="treeTableDisplay"></div>
+
+        {% elif algorithm == "hash_table" %}
+            <div class="algorithm-description">
+                <h3>Хеш-таблица</h3>
+                <p>
+                    Хеш-таблица — это структура данных, которая использует хеш-функцию для быстрого доступа к элементам по ключу. Элементы хранятся в виде пар ключ-значение.
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    hash_table = {}
+                    def insert(key, value):
+                        hash_table[key] = value
+
+                    def delete(key):
+                        if key in hash_table:
+                            del hash_table[key]
+                </code></pre>
+            </div>
+            <div class="input-section">
+                <input type="text" id="hashTableKey" placeholder="Введите ключ">
+                <input type="text" id="hashTableValue" placeholder="Введите значение">
+                <button onclick="hashTableOperation('insert')" class="btn">Добавить</button>
+                <button onclick="hashTableOperation('delete')" class="btn">Удалить</button>
+            </div>
+            <div class="table-container" id="hashTableDisplay"></div>
+
+        {% elif algorithm == "sorted_table" %}
+            <div class="algorithm-description">
+                <h3>Таблица с сортировкой на основе массива</h3>
+                <p>
+                    Таблица с сортировкой хранит элементы в отсортированном порядке. При добавлении нового элемента таблица автоматически сортируется.
+                </p>
+                <h4>Пример кода:</h4>
+                <pre><code>
+                    sorted_table = []
+                    def insert(value):
+                        sorted_table.append(value)
+                        sorted_table.sort()
+
+                    def delete(value):
+                        if value in sorted_table:
+                            sorted_table.remove(value)
+                </code></pre>
+            </div>
+            <div class="input-section">
+                <input type="text" id="sortedTableValue" placeholder="Введите значение">
+                <button onclick="sortedTableOperation('insert')" class="btn">Добавить</button>
+                <button onclick="sortedTableOperation('delete')" class="btn">Удалить</button>
+            </div>
+            <div class="table-container" id="sortedTableDisplay"></div>
         {% endif %}
     </div>
 </body>

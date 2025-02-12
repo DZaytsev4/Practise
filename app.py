@@ -9,11 +9,64 @@ algorithms = {
     "bubble_sort": "Bubble Sort",
     "insertion_sort": "Insertion Sort",
     "merge_sort": "Merge Sort",
-    "quick_sort": "Quick Sort"
+    "quick_sort": "Quick Sort",
+    "linear_table": "Linear Table",
+    "tree_table": "Tree Table",
+    "hash_table": "Hash Table",
+    "sorted_table": "Sorted Table"
 }
 
 stack = []
 queue = []
+linear_table = []
+tree_table = {}
+hash_table = {}
+sorted_table = []
+
+
+def insert_linear_table(value):
+    linear_table.append(value)
+    return linear_table
+
+
+def delete_linear_table(value):
+    if value in linear_table:
+        linear_table.remove(value)
+    return linear_table
+
+
+def insert_tree_table(key, value):
+    tree_table[key] = value
+    return tree_table
+
+
+def delete_tree_table(key):
+    if key in tree_table:
+        del tree_table[key]
+    return tree_table
+
+
+def insert_hash_table(key, value):
+    hash_table[key] = value
+    return hash_table
+
+
+def delete_hash_table(key):
+    if key in hash_table:
+        del hash_table[key]
+    return hash_table
+
+
+def insert_sorted_table(value):
+    sorted_table.append(value)
+    sorted_table.sort()
+    return sorted_table
+
+
+def delete_sorted_table(value):
+    if value in sorted_table:
+        sorted_table.remove(value)
+    return sorted_table
 
 
 def push_stack(value):
@@ -171,6 +224,56 @@ def queue_operations():
     elif operation == "dequeue":
         dequeue()
     return jsonify(queue=queue)
+
+
+@app.route('/linear_table', methods=['POST'])
+def linear_table_operations():
+    data = request.json
+    operation = data.get("operation")
+    value = data.get("value")
+    if operation == "insert":
+        insert_linear_table(value)
+    elif operation == "delete":
+        delete_linear_table(value)
+    return jsonify(linear_table=linear_table)
+
+
+@app.route('/tree_table', methods=['POST'])
+def tree_table_operations():
+    data = request.json
+    operation = data.get("operation")
+    key = data.get("key")
+    value = data.get("value")
+    if operation == "insert":
+        insert_tree_table(key, value)
+    elif operation == "delete":
+        delete_tree_table(key)
+    return jsonify(tree_table=tree_table)
+
+
+@app.route('/hash_table', methods=['POST'])
+def hash_table_operations():
+    data = request.json
+    operation = data.get("operation")
+    key = data.get("key")
+    value = data.get("value")
+    if operation == "insert":
+        insert_hash_table(key, value)
+    elif operation == "delete":
+        delete_hash_table(key)
+    return jsonify(hash_table=hash_table)
+
+
+@app.route('/sorted_table', methods=['POST'])
+def sorted_table_operations():
+    data = request.json
+    operation = data.get("operation")
+    value = data.get("value")
+    if operation == "insert":
+        insert_sorted_table(value)
+    elif operation == "delete":
+        delete_sorted_table(value)
+    return jsonify(sorted_table=sorted_table)
 
 
 if __name__ == "__main__":
